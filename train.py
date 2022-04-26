@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.data as Dataset
+import torch.utils.data as torch_data
 import numpy as np
 
 from net import CPM_UNet
@@ -16,7 +16,7 @@ test_losses = AverageMeter()
 def train(device, optimizer, model, criterion):
     model.train()
     train_dataset = OMC(is_training=True)
-    train_loader = Dataset.DataLoader(train_dataset, batch_size=16, shuffle=True, \
+    train_loader = torch_data.DataLoader(train_dataset, batch_size=16, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=4)
 
     for img, heatmap, centermap in train_loader:
@@ -39,7 +39,7 @@ def train(device, optimizer, model, criterion):
 def test(device, model, criterion):
     model.eval()
     test_dataset = OMC(is_training=False)
-    test_loader = Dataset.DataLoader(test_dataset, batch_size=1, shuffle=False, \
+    test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
     for i, (img, heatmap, centermap) in enumerate(test_loader):
