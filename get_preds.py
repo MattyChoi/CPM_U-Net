@@ -38,13 +38,14 @@ def predict():
     for i, imgs in enumerate(eval_loader):
         
         imgs_torch = torch.FloatTensor(imgs).to(device)
-        # centermap is just the center of image, i.e. (184,184)
-        centermap = generate_heatmap(np.zeros((368,368)), pt=[184,184])
+        
+        # get centermap from json file instead of this below
+        centermap = gen_hmaps(np.zeros((368,368)), pt=[184,184])
         centermap_torch = torch.FloatTensor(centermap).unsqueeze(0).unsqueeze(1).to(device) # add dim
 
         pred_hmaps = model(imgs_torch, centermap_torch)
         
-        joints = heatmaps_to_coords(pred_hmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:16] )
+        joints = hmaps_to_coords(pred_hmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:16] )
 
 
 
