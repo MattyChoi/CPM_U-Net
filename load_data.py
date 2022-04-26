@@ -4,6 +4,8 @@ import os
 import json
 import matplotlib.pyplot as plt
 import utils
+import skimage.transform
+import skimage.filters
 
 dataset_dir = r'.\data'
 
