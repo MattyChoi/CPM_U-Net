@@ -14,7 +14,6 @@ class OMC(Dataset):
     """
     Dataset for OMC
     """
-
     def __init__(self, is_training=True):
         super(OMC, self).__init__()
         self.is_training = is_training
@@ -31,8 +30,8 @@ class OMC(Dataset):
 
     def __getitem__(self, index):
         features = self.feature_list[index]
+        input_shape = (256, 256)
 
-        img_sz = (256,256)
         if(self.is_training==True):
             img_folder_dir = os.path.join(dataset_dir, 'train')
         else:
@@ -46,13 +45,12 @@ class OMC(Dataset):
         pts_crop = np.array(pts_crop)
         cen_crop = np.array(cen_crop)
         
-        height, width, _ = img_crop.shape
         train_img = np.transpose(img_crop, (2,0,1))/255.0
 
-        train_heatmaps = utils.gen_hmaps(np.zeros((256,256)), pts_crop)
+        train_heatmaps = utils.gen_hmaps(np.zeros(input_shape), pts_crop)
         train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
 
-        train_centermap = utils.gen_cmap(np.zeros((256,256)), cen_crop)
+        train_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
         train_centermap = np.expand_dims(train_centermap, axis=0)
 
         return train_img, train_heatmaps, train_centermap
@@ -82,6 +80,8 @@ def main():
 
         #imgutils.show_stack_joints(img_crop[0], pts_crop[0], cen_crop[0], num_fig=2*i+1)
         #imgutils.show_stack_joints(img[0], pts[0], cen[0], num_fig=2*i+2)
+        print(img[0].shape)
+        print(heatmap[0].shape)
         utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
         #plt.pause(5)
         if i == 0:

@@ -78,7 +78,7 @@ class CPM_StageT(nn.Module):
 
         self.conv_image = nn.Conv2d(128, 32, kernel_size=5, padding=2)
 
-        self.conv1 = nn.Conv2d(32 + self.k + 2, 128, kernel_size=11, padding=5)
+        self.conv1 = nn.Conv2d(32 + self.num_joints + 2, 128, kernel_size=11, padding=5)
         self.conv2 = nn.Conv2d(128, 128, kernel_size=11, padding=5)
         self.conv3 = nn.Conv2d(128, 128, kernel_size=11, padding=5)
         self.conv4 = nn.Conv2d(128, 128, kernel_size=1, padding=0)

@@ -60,19 +60,19 @@ def test(device, model, criterion):
         test_losses.update(loss.item(), img.size(0))
 
         # show predicted heatmaps 
-        if i == 0:
-            heatmaps_pred_copy = score6[0]
-            heatmaps_copy = heatmap[0] 
-            img_copy = img[0]
-            heatmaps_pred_np = heatmaps_pred_copy.detach().cpu().numpy()
-            heatmaps_pred_np = np.transpose(heatmaps_pred_np, (1, 2, 0))
-            heatmaps_np = heatmaps_copy.detach().cpu().numpy()
-            heatmaps_np = np.transpose(heatmaps_np, (1, 2, 0))
-            img_np = img_copy.detach().cpu().numpy()
-            img_np = np.transpose(img_np, (1, 2, 0))
+        # if i == 0:
+        #     heatmaps_pred_copy = score6[0]
+        #     heatmaps_copy = heatmap[0] 
+        #     img_copy = img[0]
+        #     heatmaps_pred_np = heatmaps_pred_copy.detach().cpu().numpy()
+        #     heatmaps_pred_np = np.transpose(heatmaps_pred_np, (1, 2, 0))
+        #     heatmaps_np = heatmaps_copy.detach().cpu().numpy()
+        #     heatmaps_np = np.transpose(heatmaps_np, (1, 2, 0))
+        #     img_np = img_copy.detach().cpu().numpy()
+        #     img_np = np.transpose(img_np, (1, 2, 0))
             
-            show_heatmaps(img_np, heatmaps_pred_np, num_fig=1)
-            show_heatmaps(img_np, heatmaps_np, num_fig=2)
+        #     show_heatmaps(img_np, heatmaps_pred_np, num_fig=1)
+        #     show_heatmaps(img_np, heatmaps_np, num_fig=2)
             
 
 def main():
