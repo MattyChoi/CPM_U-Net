@@ -4,9 +4,9 @@ import torch.nn.functional as F
 
 from unet import UNet
 
-class CPM(nn.Module):
+class CPM_UNet(nn.Module):
     def __init__(self, num_stages, num_joints):
-        super(CPM, self).__init__()
+        super(CPM_UNet, self).__init__()
         self.num_stages = num_stages
         self.heatmaps = []
 

@@ -3,6 +3,7 @@ import json
 import numpy as np
 import numpy.linalg as LA
 
+
 def mpjpe(ground, preds, num_joints=17):
     error = np.zeros(num_joints)
     num_imgs = len(ground)
@@ -13,6 +14,7 @@ def mpjpe(ground, preds, num_joints=17):
         error += LA.norm(diff, axis=1) / width
 
     return error / num_imgs
+
 
 def pck(ground, preds, num_joints=17, tol=0.2):
     error = 0
@@ -25,6 +27,7 @@ def pck(ground, preds, num_joints=17, tol=0.2):
 
     return error / (num_imgs * num_joints)
 
+
 def ap(ground, preds, num_joints=17, tol=0.5):
     error = 0
     num_imgs = len(ground)
@@ -35,9 +38,11 @@ def ap(ground, preds, num_joints=17, tol=0.5):
 
     return error / (num_imgs * num_joints)
 
+
 def oks(truth, pred, width, k=np.ones(17)):
     diff = truth - pred
     return np.exp( ( np.sum(diff * diff, axis=1) / (width * k))**2 / -2.0) 
+
 
 def json_to_dic(path):
     with open(path) as f:
