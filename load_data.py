@@ -15,36 +15,31 @@ class OMC(Dataset):
         super(OMC, self).__init__()
         self.is_training = is_training
 
-        train_json_dir = os.path.join(dataset_dir, 'train_annotations.json')
-        val_json_dir = os.path.join(dataset_dir, 'val_annotations.json')
+        if self.is_training:
+            dir = os.path.join(dataset_dir, 'train_annotations.json')
+        else:
+            dir = os.path.join(dataset_dir, 'val_annotations.json')
 
-        with open(train_json_dir) as f:
+        with open(dir) as f:
             dic = json.load(f)
-            self.train_list = [item for item in dic['data']]
-
-        with open(val_json_dir) as f:
-            dic = json.load(f)
-            self.val_list = [item for item in dic['data']]
+            self.feature_list = [item for item in dic['data']]
 
 
     def __getitem__(self, index):
-        if self.is_training:
-            ele_anno = self.anno[self.train_list[index]]
-        else:
-            ele_anno = self.anno[self.test_list[index]]
+        features = self.feature_list[index]
 
         img_sz = (368,368)
         img_folder_dir = os.path.join(dataset_dir, 'train')
-        img_dir = os.path.join(img_folder_dir, ele_anno['img_paths'])
+        img_dir = os.path.join(img_folder_dir, features['img_paths'])
         img = dataset_dir.load_img(img_dir)
 
-        pts = ele_anno['joint_self']
-        cen = ele_anno['objpos'].copy()
-        scale = ele_anno['scale_provided']
+        pts = features['joint_self']
+        cen = features['objpos'].copy()
+        scale = features['scale_provided']
 
         # generate crop image
         #print(img)
-        img_crop, pts_crop, cen_crop = utils.crop(img, ele_anno)
+        img_crop, pts_crop, cen_crop = utils.crop(img, features)
         pts_crop = np.array(pts_crop)
         cen_crop = np.array(cen_crop)
         
@@ -59,10 +54,10 @@ class OMC(Dataset):
 
         return train_img, train_heatmaps, train_centermap
 
+
     def __len__(self):
-        if self.is_training:
-            return len(self.train_list)
-        return len(self.val_list)
+        return len(self.feature_list)
+
 
     def collate_fn(self, batch):
         imgs, heatmaps, centermap = list(zip(*batch))
