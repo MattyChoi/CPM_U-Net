@@ -5,7 +5,7 @@ import json
 import matplotlib.pyplot as plt
 import utils
 
-dataset_dir = r'.\data'
+dataset_dir = './data'
 
 class OMC(Dataset):
     """
