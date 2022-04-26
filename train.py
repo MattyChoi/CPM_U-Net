@@ -16,7 +16,7 @@ test_losses = AverageMeter()
 def train(device, optimizer, model, criterion):
     model.train()
     train_dataset = OMC(is_training=True)
-    train_loader = torch_data.DataLoader(train_dataset, batch_size=16, shuffle=True, \
+    train_loader = torch_data.DataLoader(train_dataset, batch_size=1, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=4)
 
     for img, heatmap, centermap in train_loader:
