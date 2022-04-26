@@ -1,11 +1,14 @@
 from torch.utils.data import Dataset
+import torch.utils.data as torchdata
+import torch
 import numpy as np
 import os
 import json
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import utils
 
-dataset_dir = './data'
+dataset_dir = "./data"
 
 class OMC(Dataset):
     """
@@ -16,9 +19,9 @@ class OMC(Dataset):
         self.is_training = is_training
 
         if self.is_training:
-            dir = os.path.join(dataset_dir, 'train_annotations.json')
+            dir = os.path.join(dataset_dir, 'train_annotation.json')
         else:
-            dir = os.path.join(dataset_dir, 'val_annotations.json')
+            dir = os.path.join(dataset_dir, 'val_annotation.json')
 
         with open(dir) as f:
             dic = json.load(f)
@@ -29,13 +32,12 @@ class OMC(Dataset):
         features = self.feature_list[index]
 
         img_sz = (368,368)
-        img_folder_dir = os.path.join(dataset_dir, 'train')
+        if(self.is_training==True):
+            img_folder_dir = os.path.join(dataset_dir, 'train')
+        else:
+            img_folder_dir = os.path.join(dataset_dir, 'val')
         img_dir = os.path.join(img_folder_dir, features['file'])
-        img = dataset_dir.load_img(img_dir)
-
-        pts = features['joint_self']
-        cen = features['objpos'].copy()
-        scale = features['scale_provided']
+        img = mpimg.imread(img_dir)
 
         # generate crop image
         #print(img)
@@ -67,3 +69,23 @@ class OMC(Dataset):
         centermap = np.stack(centermap, axis=0)
 
         return imgs, heatmaps, centermap
+
+def main():
+    #plt.ion()
+    omc = OMC(is_training=True)
+    dataloader = torchdata.DataLoader(omc, batch_size=1, shuffle=True, collate_fn=omc.collate_fn)
+    for i, (img, heatmap, centermap) in enumerate(dataloader):
+        
+        #print(img.shape, heatmap.shape, centermap.shape)
+        #print(img_crop[0].shape)
+
+        #imgutils.show_stack_joints(img_crop[0], pts_crop[0], cen_crop[0], num_fig=2*i+1)
+        #imgutils.show_stack_joints(img[0], pts[0], cen[0], num_fig=2*i+2)
+        utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
+        #plt.pause(5)
+        if i == 0:
+            break
+    #plt.ioff()
+
+if __name__ == "__main__":
+    main()

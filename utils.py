@@ -87,85 +87,58 @@ def generate_heatmaps(img, pts, sigma_valu=2):
 
 
 
-def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
+def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
 
     # get bbox
-    pts = ele_anno['joint_self']
-    cen = ele_anno['objpos'].copy()
+    pts = ele_anno['landmarks']
+    # print("pts", pts)
+    
+    
+    # pts = np.array([[x, y] for x, y in zip(xs, ys)])
 
-    pts = np.array(pts)
-    pts_nonzero = np.where(pts[:,1] != 0)[0]
-    pts_zero = np.where(pts[:,1] == 0)[0]
-    xs = pts[:, 0]
-    #xs = pts[pts_nonzero][:, 0]
-    ys = pts[:, 1]
-    #ys = pts[pts_nonzero][:, 1]
-    bbox = [(max(max(xs[pts_nonzero]),cen[0]) + min(min(xs[pts_nonzero]), cen[0]) )/2.0,
-            (max(max(ys[pts_nonzero]),cen[1]) + min(min(ys[pts_nonzero]), cen[1]) )/2.0,
-            (max(max(xs[pts_nonzero]),cen[0]) - min(min(xs[pts_nonzero]), cen[0]) )*1.3,
-            (max(max(ys[pts_nonzero]),cen[1]) - min(min(ys[pts_nonzero]), cen[1]) )*1.3]
-    bbox = np.array(bbox)
-
-    if use_rotate:
-        H, W = img.shape[0], img.shape[1]
-        img_center = (W / 2.0 , H / 2.0)
-        degree = np.random.uniform(-30,30)
-        rotateMat = cv2.getRotationMatrix2D(img_center, degree, scale=1.0)
-        cos_val = np.abs(rotateMat[0, 0])
-        sin_val = np.abs(rotateMat[0, 1])
-        new_width = int(H * sin_val + W * cos_val)
-        new_height = int(H * cos_val + W * sin_val)
-        rotateMat[0, 2] += (new_width / 2.) - img_center[0]
-        rotateMat[1, 2] += (new_height / 2.) - img_center[1]
-
-        img = cv2.warpAffine(img, rotateMat, (new_width, new_height), borderValue=(0,0,0)) # black border
-        
-
-        num = len(pts)
-        for i in range(num):
-            if pts[i,1]==0:
-                continue
-            x = xs[i]
-            y = ys[i]
-            p = np.array([x, y, 1])
-            p = rotateMat.dot(p)
-            xs[i] = p[0]
-            ys[i] = p[1]
-
-        x = cen[0]
-        y = cen[1]
-        p = np.array([x, y, 1])
-        p = rotateMat.dot(p)
-        cen[0] = p[0]
-        cen[1] = p[1]
-        # update bbox 
-        bbox = [(max(max(xs[pts_nonzero]),cen[0]) + min(min(xs[pts_nonzero]), cen[0]) )/2.0,
-                (max(max(ys[pts_nonzero]),cen[1]) + min(min(ys[pts_nonzero]), cen[1]) )/2.0,
-                (max(max(xs[pts_nonzero]),cen[0]) - min(min(xs[pts_nonzero]), cen[0]) )*1.3,
-                (max(max(ys[pts_nonzero]),cen[1]) - min(min(ys[pts_nonzero]), cen[1]) )*1.3]
-        bbox = np.array(bbox)
-
-
-    ###
-    #pts = [[xs[i], ys[i], pts[i,2]] for i in range(len(xs))]
-    #show_stack_joints(img, pts, cen)
-    ###
+    bbox = ele_anno['bbox']
+    vis = np.array(ele_anno['visibility'])
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+    pts_nonzero = np.where(vis != 0)
+    pts_zero = np.where(vis == 0)
+    xs = np.array(pts[0::2]).T
+    ys = np.array(pts[1::2]).T
+    xs = np.array(xs[pts_nonzero])
+    ys = np.array(ys[pts_nonzero])
+    # print("ptsx", xs)
+    # print("ptsy", ys)
+    cen = np.array((1,2))
+    cen[0] = int(bbox[0] + bbox[2]/2)
+    cen[1] = int(bbox[1] + bbox[3]/2)
 
     H,W = img.shape[0], img.shape[1]
-    scale = np.random.uniform(0.8, 1.3) # given data
-    bbox[2] *= scale
-    bbox[3] *= scale
     # topleft:x1,y1  bottomright:x2,y2
-    bb_x1 = int(bbox[0] - bbox[2]/2)
-    bb_y1 = int(bbox[1] - bbox[3]/2)
-    bb_x2 = int(bbox[0] + bbox[2]/2)
-    bb_y2 = int(bbox[1] + bbox[3]/2)
+    bb_x1 = int(bbox[0])
+    bb_y1 = int(bbox[1])
+    bb_x2 = int(bbox[0] + bbox[2])
+    bb_y2 = int(bbox[1] + bbox[3])
+
+    newX = bb_x2-bb_x1
+    newY = bb_y2-bb_y1
+    if(newX>newY):
+        dif = newX-newY
+        bb_y1-=int(dif/2)
+        bb_y2+=int(dif/2)
+    else:
+        dif=newY-newX
+        bb_x1-=int(dif/2)
+        bb_x2+=int(dif/2)
 
     if bb_x1<0 or bb_x2>W or bb_y1<0 or bb_y2>H:
         pad = int(max(-bb_x1, bb_x2-W, -bb_y1, bb_y2-H))
         img = np.pad(img, ((pad, pad),(pad,pad),(0,0)), 'constant')
     else:
         pad = 0
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show() 
     img = img[bb_y1+pad:bb_y2+pad, bb_x1+pad:bb_x2+pad]
 
     xs = np.where(xs != 0, xs-bb_x1, xs)
@@ -174,18 +147,8 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
     bbox[0] -= bb_x1
     bbox[1] -= bb_y1
     
-    cen[0] -= bb_x1
-    cen[1] -= bb_y1
-
-    # horizontal flip
-    if use_hflip and np.random.rand() > 0.:
-        H,W = img.shape[0], img.shape[1]
-        img = cv2.flip(img, 1)
-        xs = (W - 1) - xs
-        cen[0] = (W - 1) - cen[0]
-        for i,j in ((12,13),(11,14),(10,15),(2,3),(1,4), (0,5)):
-            xs[i], xs[j] = xs[j].copy(), xs[i].copy()
-            ys[i], ys[j] = ys[j].copy(), ys[i].copy()
+    cen[0] = int((bb_x2-bb_x1)/2)
+    cen[1] = int((bb_y2-bb_y1)/2)
 
     # resize
     H,W = img.shape[0], img.shape[1]
@@ -193,22 +156,18 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
     ys = ys*crop_size/H
     cen[0] = cen[0]*crop_size/W
     cen[1] = cen[1]*crop_size/H
+    # print("scale", scale)
+    # print("bbox", bbox)
+
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
     img = cv2.resize(img, (crop_size, crop_size))
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
 
-    # generate heatmaps
-
-
-    # generate centermap
-
-    # pts_crop = []
-    # for i in range(pts.shape[0]):
-    #     if i in pts_nonzero:
-    #         pts_crop.append([xs[i], ys[i], 1.0])
-    #     else:
-    #         pts_crop.append([ 0.,0.,0. ])
-    # pts_crop = np.array(pts_crop)
-
-    pts = [[xs[i], ys[i], pts[i,2]] for i in range(len(xs))]
+    pts = [[xs[i], ys[i]] for i in range(len(xs))]
 
     return img, pts, cen
 
