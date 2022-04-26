@@ -85,41 +85,60 @@ def gen_hmaps(img, pts, sigma_valu=2):
 
 
 
-def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
+
+def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
+
     # get bbox
-    pts = ele_anno['joint_self']
-    cen = ele_anno['objpos'].copy()
+    pts = ele_anno['landmarks']
+    # print("pts", pts)
+    
+    
+    # pts = np.array([[x, y] for x, y in zip(xs, ys)])
 
-    pts = np.array(pts)
-    pts_nonzero = np.where(pts[:,1] != 0)[0]
-    pts_zero = np.where(pts[:,1] == 0)[0]
-    xs = pts[:, 0]
-    #xs = pts[pts_nonzero][:, 0]
-    ys = pts[:, 1]
-    #ys = pts[pts_nonzero][:, 1]
-    bbox = [(max(max(xs[pts_nonzero]),cen[0]) + min(min(xs[pts_nonzero]), cen[0]) )/2.0,
-            (max(max(ys[pts_nonzero]),cen[1]) + min(min(ys[pts_nonzero]), cen[1]) )/2.0,
-            (max(max(xs[pts_nonzero]),cen[0]) - min(min(xs[pts_nonzero]), cen[0]) )*1.3,
-            (max(max(ys[pts_nonzero]),cen[1]) - min(min(ys[pts_nonzero]), cen[1]) )*1.3]
-    bbox = np.array(bbox)
-
+    bbox = ele_anno['bbox']
+    vis = np.array(ele_anno['visibility'])
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+    pts_nonzero = np.where(vis != 0)
+    pts_zero = np.where(vis == 0)
+    xs = np.array(pts[0::2]).T
+    ys = np.array(pts[1::2]).T
+    xs = np.array(xs[pts_nonzero])
+    ys = np.array(ys[pts_nonzero])
+    # print("ptsx", xs)
+    # print("ptsy", ys)
+    cen = np.array((1,2))
+    cen[0] = int(bbox[0] + bbox[2]/2)
+    cen[1] = int(bbox[1] + bbox[3]/2)
 
 
     H,W = img.shape[0], img.shape[1]
-    scale = np.random.uniform(0.8, 1.3) # given data
-    bbox[2] *= scale
-    bbox[3] *= scale
     # topleft:x1,y1  bottomright:x2,y2
-    bb_x1 = int(bbox[0] - bbox[2]/2)
-    bb_y1 = int(bbox[1] - bbox[3]/2)
-    bb_x2 = int(bbox[0] + bbox[2]/2)
-    bb_y2 = int(bbox[1] + bbox[3]/2)
+    bb_x1 = int(bbox[0])
+    bb_y1 = int(bbox[1])
+    bb_x2 = int(bbox[0] + bbox[2])
+    bb_y2 = int(bbox[1] + bbox[3])
+
+    newX = bb_x2-bb_x1
+    newY = bb_y2-bb_y1
+    if(newX>newY):
+        dif = newX-newY
+        bb_y1-=int(dif/2)
+        bb_y2+=int(dif/2)
+    else:
+        dif=newY-newX
+        bb_x1-=int(dif/2)
+        bb_x2+=int(dif/2)
 
     if bb_x1<0 or bb_x2>W or bb_y1<0 or bb_y2>H:
         pad = int(max(-bb_x1, bb_x2-W, -bb_y1, bb_y2-H))
         img = np.pad(img, ((pad, pad),(pad,pad),(0,0)), 'constant')
     else:
         pad = 0
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show() 
     img = img[bb_y1+pad:bb_y2+pad, bb_x1+pad:bb_x2+pad]
 
     xs = np.where(xs != 0, xs-bb_x1, xs)
@@ -128,8 +147,10 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
     bbox[0] -= bb_x1
     bbox[1] -= bb_y1
     
-    cen[0] -= bb_x1
-    cen[1] -= bb_y1
+
+    cen[0] = int((bb_x2-bb_x1)/2)
+    cen[1] = int((bb_y2-bb_y1)/2)
+
 
     # resize
     H,W = img.shape[0], img.shape[1]
@@ -137,9 +158,20 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=368):
     ys = ys*crop_size/H
     cen[0] = cen[0]*crop_size/W
     cen[1] = cen[1]*crop_size/H
-    img = cv2.resize(img, (crop_size, crop_size))
+    
+    # print("scale", scale)
+    # print("bbox", bbox)
 
-    pts = [[xs[i], ys[i], pts[i,2]] for i in range(len(xs))]
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+    img = cv2.resize(img, (crop_size, crop_size))
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+
+    pts = [[xs[i], ys[i]] for i in range(len(xs))]
+
 
     return img, pts, cen
 
