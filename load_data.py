@@ -30,7 +30,7 @@ class OMC(Dataset):
 
         img_sz = (368,368)
         img_folder_dir = os.path.join(dataset_dir, 'train')
-        img_dir = os.path.join(img_folder_dir, features['img_paths'])
+        img_dir = os.path.join(img_folder_dir, features['file'])
         img = dataset_dir.load_img(img_dir)
 
         pts = features['joint_self']
