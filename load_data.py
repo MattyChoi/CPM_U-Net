@@ -48,10 +48,10 @@ class OMC(Dataset):
         height, width, _ = img_crop.shape
         train_img = np.transpose(img_crop, (2,0,1))/255.0
 
-        train_heatmaps = utils.gen_hmaps(np.zeros((46,46)), pts_crop/8)
+        train_heatmaps = utils.gen_hmaps(np.zeros((256,256)), pts_crop)
         train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
 
-        train_centermap = utils.gen_cmap(np.zeros((368,368)), cen_crop)
+        train_centermap = utils.gen_cmap(np.zeros((256,256)), cen_crop)
         train_centermap = np.expand_dims(train_centermap, axis=0)
 
         return train_img, train_heatmaps, train_centermap
