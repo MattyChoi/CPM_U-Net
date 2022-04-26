@@ -10,8 +10,6 @@ class CPM_UNet(nn.Module):
         self.num_stages = num_stages
         self.heatmaps = []
 
-        # self.pool_center = None
-
         # replace self.features with a unet architecture
         # self.features = CPM_ImageFeatures()
         self.features = UNet(3)
@@ -25,7 +23,7 @@ class CPM_UNet(nn.Module):
 
         self.heatmaps.append(stage1_maps)
 
-        for _ in range(self.num_stages - 2):
+        for _ in range(self.num_stages - 1):
             cur_map = self.stageT(features, self.heatmaps[-1], center_map)
             self.heatmaps.append(cur_map)
 
@@ -73,9 +71,9 @@ class CPM_StageT(nn.Module):
         super(CPM_StageT, self).__init__()
         self.num_joints = num_joints
 
-        self.conv_image = nn.Conv2d(64, 64, kernel_size=5, padding=2)
+        self.conv_image = nn.Conv2d(64, 32, kernel_size=5, padding=2)
 
-        self.conv1 = nn.Conv2d(64 + self.num_joints + 2, 128, kernel_size=11, padding=5)
+        self.conv1 = nn.Conv2d(32 + self.num_joints + 2, 128, kernel_size=11, padding=5)
         self.conv2 = nn.Conv2d(128, 128, kernel_size=11, padding=5)
         self.conv3 = nn.Conv2d(128, 128, kernel_size=11, padding=5)
         self.conv4 = nn.Conv2d(128, 128, kernel_size=1, padding=0)

@@ -28,12 +28,11 @@ def train(device, optimizer, model, criterion):
         pred_heatmaps = model(img, centermap)
 
         losses = [criterion(ground_hmap, pred) for pred in pred_heatmaps]
-
-        loss = sum(losses)
+        loss = losses[0] + losses[1] + losses[2]
         train_losses.update(loss.item(), img.size(0))
 
         optimizer.zero_grad()
-        # loss.backward()
+        loss.backward(retain_graph=True)
         optimizer.step()
 
 
