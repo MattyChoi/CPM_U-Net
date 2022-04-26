@@ -11,6 +11,57 @@ class OMC(Dataset):
     """
     Dataset for OMC
     """
+
+    def generate_heatmap(heatmap, pt, sigma_valu=2):
+        '''
+        :param heatmap: should be a np zeros array with shape (H,W) (only 1 channel), not (H,W,1)
+        :param pt: point coords, np array
+        :param sigma: should be a tuple with odd values (obsolete)
+        :param sigma_valu: value for gaussian blur
+        :return: a np array of one joint heatmap with shape (H,W)
+        This function is obsolete, use 'generate_heatmaps()' instead.
+        '''
+        heatmap[int(pt[1])][int(pt[0])] = 1
+        heatmap = skimage.filters.gaussian(heatmap, sigma=sigma_valu)
+        am = np.max(heatmap)
+        heatmap = heatmap/am
+        return heatmap
+
+
+
+    def generate_heatmaps(img, pts, sigma_valu=2):
+        '''
+        Generate 16 heatmaps
+        :param img: np arrray img, (H,W,C)
+        :param pts: joint points coords, np array, same resolu as img
+        :param sigma: should be a tuple with odd values (obsolete)
+        :param sigma_valu: vaalue for gaussian blur
+        :return: np array heatmaps, (H,W,num_pts)
+        '''
+        H, W = img.shape[0], img.shape[1]
+        num_pts = len(pts)
+        heatmaps = np.zeros((H, W, num_pts + 1))
+        for i, pt in enumerate(pts):
+            # Filter unavailable heatmaps
+            if pt[0] == 0 and pt[1] == 0:
+                continue
+            # Filter some points out of the image
+            if pt[0] >= W:
+                pt[0] = W-1
+            if pt[1] >= H:
+                pt[1] = H-1
+            heatmap = heatmaps[:, :, i]
+            heatmap[int(pt[1])][int(pt[0])] = 1  # reverse sequence
+            heatmap = skimage.filters.gaussian(heatmap, sigma=sigma_valu)  ##(H,W,1) -> (H,W)
+            am = np.max(heatmap)
+            heatmap = heatmap / am  # scale to [0,1]
+            heatmaps[:, :, i] = heatmap
+
+        heatmaps[:, :, num_pts] = 1.0 - np.max(heatmaps[:, :, :num_pts], axis=2) # add background dim
+
+        return heatmaps
+
+
     def __init__(self, is_training=True):
         super(OMC, self).__init__()
         self.is_training = is_training
