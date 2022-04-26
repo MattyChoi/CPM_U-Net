@@ -31,7 +31,7 @@ class OMC(Dataset):
     def __getitem__(self, index):
         features = self.feature_list[index]
 
-        img_sz = (368,368)
+        img_sz = (256,256)
         if(self.is_training==True):
             img_folder_dir = os.path.join(dataset_dir, 'train')
         else:
