@@ -36,6 +36,7 @@ def load_img(dir):
     return img
 
 
+# for generating center map
 def generate_heatmap(heatmap, pt, sigma_valu=2):
     '''
     :param heatmap: should be a np zeros array with shape (H,W) (only 1 channel), not (H,W,1)
@@ -52,7 +53,7 @@ def generate_heatmap(heatmap, pt, sigma_valu=2):
     return heatmap
 
 
-
+# for generating ground truth heatmaps
 def generate_heatmaps(img, pts, sigma_valu=2):
     '''
     Generate 16 heatmaps
