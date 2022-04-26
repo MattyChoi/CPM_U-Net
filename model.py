@@ -57,7 +57,8 @@ class CPM_Stage1(nn.Module):
         super(CPM_Stage1, self).__init__()
         self.num_joints = num_joints
 
-        self.features = CPM_ImageFeatures()
+        # self.features = CPM_ImageFeatures()
+        self.features = UNet(3)
         self.conv5 = nn.Conv2d(32, 512, kernel_size=9, padding=4)
         self.conv6 = nn.Conv2d(512, 512, kernel_size=1)
         self.conv7 = nn.Conv2d(512, self.num_joints + 1, kernel_size=1)
