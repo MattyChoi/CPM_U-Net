@@ -80,7 +80,7 @@ def gen_hmaps(img, pts, sigma_valu=2):
         heatmaps[:, :, i] = heatmap
 
     heatmaps[:, :, num_pts] = 1.0 - np.max(heatmaps[:, :, :num_pts], axis=2) # add background dim
-
+    print(heatmaps.shape)
     return heatmaps
 
 
@@ -187,33 +187,32 @@ def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
     '''
     H, W = img.shape[0], img.shape[1]
     dict_name = {
-        0: 'origin img',
-        1: 'left ankle',
-        2: 'left knee',
-        3: 'left hip',
-        4: 'right hip',
-        5: 'right knee',
-        6: 'right ankle',
-        7: 'belly',
-        8: 'chest',
-        9: 'neck',
-        10: 'head',
-        11: 'left wrist',
-        12: 'left elbow',
-        13: 'left shoulder',
-        14: 'right shoulder',
-        15: 'right elbow',
-        16: 'right wrist',
-        17: 'background'
+    0: 'Original Image',
+    1: 'REye',
+    2: 'LEye',
+    3: 'Nose',
+    4: 'Head',
+    5: 'Neck',
+    6: 'RShoulder',
+    7: 'RElbow',
+    8: 'RWrist',
+    9: 'LShoulder',
+    10: 'LElbow',
+    11: 'LWrist',
+    12: 'Hip',
+    13: 'RKnee',
+    14: 'RAnkle',
+    15: 'LKnee',
+    16: 'LAnkle',
+    17: 'Tail'
     }
 
     # resize heatmap to size of image
     if heatmaps.shape[0] != H:
         heatmaps = skimage.transform.resize(heatmaps, (H, W))
 
-    heatmap_c = gen_hmaps(np.zeros((H, W)), c)
     plt.figure(num_fig)
-    for i in range(heatmaps.shape[2] + 1):
+    for i in range(heatmaps.shape[2]):
         plt.subplot(4, 5, i + 1)
         plt.title(dict_name[i])
         if i == 0:
@@ -221,9 +220,6 @@ def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
         else:
             plt.imshow(heatmaps[:, :, i - 1])
         plt.axis('off')
-    plt.subplot(4, 5, 20)
-    plt.imshow(heatmap_c)  # Only take in (H,W) or (H,W,3)
-    plt.axis('off')
     plt.show()
 
 

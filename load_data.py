@@ -75,12 +75,11 @@ def main():
     dataloader = torchdata.DataLoader(omc, batch_size=1, shuffle=True, collate_fn=omc.collate_fn)
     for i, (img, heatmap, centermap) in enumerate(dataloader):
         
-        #print(img.shape, heatmap.shape, centermap.shape)
         #print(img_crop[0].shape)
 
         #imgutils.show_stack_joints(img_crop[0], pts_crop[0], cen_crop[0], num_fig=2*i+1)
         #imgutils.show_stack_joints(img[0], pts[0], cen[0], num_fig=2*i+2)
-        # utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
+        utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
         #plt.pause(5)
         if i == 0:
             break
