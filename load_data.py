@@ -80,9 +80,7 @@ def main():
 
         #imgutils.show_stack_joints(img_crop[0], pts_crop[0], cen_crop[0], num_fig=2*i+1)
         #imgutils.show_stack_joints(img[0], pts[0], cen[0], num_fig=2*i+2)
-        print(img[0].shape)
-        print(heatmap[0].shape)
-        utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
+        # utils.show_heatmaps(img[0].transpose(1,2,0), heatmap[0].transpose(1,2,0))
         #plt.pause(5)
         if i == 0:
             break

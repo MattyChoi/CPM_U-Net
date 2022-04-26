@@ -104,8 +104,8 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     pts_zero = np.where(vis == 0)
     xs = np.array(pts[0::2]).T
     ys = np.array(pts[1::2]).T
-    xs = np.array(xs[pts_nonzero])
-    ys = np.array(ys[pts_nonzero])
+    # xs = np.array(xs[pts_nonzero])
+    # ys = np.array(ys[pts_nonzero])
     # print("ptsx", xs)
     # print("ptsy", ys)
     cen = np.array((1,2))
