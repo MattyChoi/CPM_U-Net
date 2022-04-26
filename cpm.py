@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from unet import UNet
-
 class CPM(nn.Module):
     def __init__(self, num_stages, num_joints):
         super(CPM, self).__init__()
@@ -11,11 +9,7 @@ class CPM(nn.Module):
         self.heatmaps = []
 
         self.pool_center = nn.AvgPool2d(kernel_size=9, stride=8, padding=1)
-
-        # replace self.features with a unet architecture
-        # self.features = CPM_ImageFeatures()
-        self.features = UNet(3)
-        
+        self.features = CPM_ImageFeatures()
         self.stage1 = CPM_Stage1(num_joints)
         self.stageT = CPM_StageT(num_joints)
 

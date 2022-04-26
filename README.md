@@ -21,3 +21,4 @@ pytorch implementations of cpm:
 https://github.com/SDUerFH/CPM
 https://github.com/shshin1210/convolutional_pose_machines
 https://github.com/jinchiniao
+https://github.com/Daniil-Osokin/gccpm-look-into-person-cvpr19.pytorch/blob/master/models/single_person_pose_with_mobilenet.py
