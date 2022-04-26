@@ -80,7 +80,7 @@ def gen_hmaps(img, pts, sigma_valu=2):
         heatmaps[:, :, i] = heatmap
 
     heatmaps[:, :, num_pts] = 1.0 - np.max(heatmaps[:, :, :num_pts], axis=2) # add background dim
-    print(heatmaps.shape)
+    
     return heatmaps
 
 

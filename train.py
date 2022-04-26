@@ -13,11 +13,12 @@ cuda = torch.cuda.is_available()
 train_losses = AverageMeter()
 test_losses = AverageMeter()
 
+
 def train(device, optimizer, model, criterion):
     model.train()
     train_dataset = OMC(is_training=True)
     train_loader = torch_data.DataLoader(train_dataset, batch_size=1, shuffle=True, \
-                                        collate_fn=train_dataset.collate_fn, num_workers=4)
+                                        collate_fn=train_dataset.collate_fn, num_workers=1)
 
     for img, heatmap, centermap in train_loader:
         img = torch.FloatTensor(img).to(device)
@@ -32,7 +33,7 @@ def train(device, optimizer, model, criterion):
         train_losses.update(loss.item(), img.size(0))
 
         optimizer.zero_grad()
-        loss.backward()
+        # loss.backward()
         optimizer.step()
 
 
