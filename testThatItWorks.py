@@ -30,13 +30,16 @@ def test(device, model):
 
         pred_heatmaps = model(img, cmap)
         pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
+        show_heatmaps(img[0].cpu().detach().numpy().transpose((1,2,0)), pred_hmap)
         offset, scale = offset_orig_coords(img_shape, pred_hmap.shape[0])
 
         pred_landmarks = []
         for joint_num in range(num_joints):
+            print((pred_hmap[:, :, joint_num]))
+            print(np.max(pred_hmap[:, :, joint_num]))
             pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
                                         pred_hmap.shape[:2]))
-
+            
             pair = pair * scale
             pair -= offset
             y, x = pair
@@ -54,7 +57,7 @@ def test(device, model):
 def main():
     device = 'cuda:0' if cuda else 'cpu'
     
-    MODEL_DIR = os.path.join('weights', 'cpm_epoch1_best.pkl')
+    MODEL_DIR = os.path.join('weights', 'cpm_epoch_1_best.pkl')
     
     model = CPM(num_stages=3, num_joints=17).to(device)
     model.load_state_dict(torch.load(MODEL_DIR))

@@ -20,7 +20,7 @@ class CPM(nn.Module):
 
         heatmaps = [stage1_maps]
         
-        for _ in range(self.num_stages - 2):
+        for _ in range(self.num_stages - 1):
             cur_map = self.stageT(features, heatmaps[-1], pooled_cmap)
             heatmaps.append(cur_map)
 
