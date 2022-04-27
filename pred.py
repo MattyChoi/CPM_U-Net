@@ -28,16 +28,18 @@ def test(device, model, dir):
     for i, (img, cmap, img_shape) in enumerate(test_loader):
         img = torch.FloatTensor(img).to(device)
         cmap = torch.FloatTensor(cmap).to(device)
+        img_shape = img_shape[0][:2]
 
         pred_heatmaps = model(img, cmap)
         pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
-        offset, scale = offset_orig_coords(img_shape)
+        offset, scale = offset_orig_coords(img_shape, pred_hmap.shape[0])
 
         landmarks = []
         for joint_num in range(num_joints):
-            pair = np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
-                                        img_shape)
-            pair *= scale
+            pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
+                                        img_shape))
+
+            pair = pair * scale
             pair -= offset
             y, x = pair
 

@@ -127,7 +127,7 @@ class sanity_check_OMC(Dataset):
     def __init__(self, is_training=False):
         super(sanity_check_OMC, self).__init__()
 
-        dir = os.path.join(dataset_dir, 'test_prediction.json')
+        dir = os.path.join(dataset_dir, 'val_annotation.json')
 
         with open(dir) as f:
             dic = json.load(f)
@@ -138,7 +138,7 @@ class sanity_check_OMC(Dataset):
         features = self.feature_list[index]
         input_shape = (256, 256)
 
-        img_folder_dir = os.path.join(dataset_dir, 'test')
+        img_folder_dir = os.path.join(dataset_dir, 'val')
         img_dir = os.path.join(img_folder_dir, features['file'])
         img = mpimg.imread(img_dir)
         img_shape = img.shape
@@ -169,6 +169,7 @@ class sanity_check_OMC(Dataset):
         landmarks = np.stack(landmarks, axis=0)
 
         return imgs, centermap, img_shape, landmarks
+
 
 def main():
     #plt.ion()
