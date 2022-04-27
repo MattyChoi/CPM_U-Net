@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class CPM(nn.Module):
     def __init__(self, num_stages, num_joints):
         super(CPM, self).__init__()
         self.num_stages = num_stages
-        self.heatmaps = []
 
         self.pool_center = nn.AvgPool2d(kernel_size=9, stride=8, padding=1)
         self.features = CPM_ImageFeatures()
@@ -18,13 +18,13 @@ class CPM(nn.Module):
         stage1_maps = self.stage1(image)
         features = self.features(image)
 
-        self.heatmaps.append(stage1_maps)
+        heatmaps = [stage1_maps]
         
         for _ in range(self.num_stages - 2):
-            cur_map = self.stageT(features, self.heatmaps[-1], pooled_cmap)
-            self.heatmaps.append(cur_map)
+            cur_map = self.stageT(features, heatmaps[-1], pooled_cmap)
+            heatmaps.append(cur_map)
 
-        return self.heatmaps
+        return heatmaps
 
 
 class CPM_ImageFeatures(nn.Module):
