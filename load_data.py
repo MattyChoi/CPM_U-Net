@@ -47,7 +47,10 @@ class OMC(Dataset):
         
         train_img = np.transpose(img_crop, (2,0,1))/255.0
         
+        # for net.py, use input_shape
+        # train_heatmaps = utils.gen_hmaps(np.zeros(input_shape), pts_crop)
         train_heatmaps = utils.gen_hmaps(np.zeros((32,32)), pts_crop)
+        
         train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
 
         train_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
