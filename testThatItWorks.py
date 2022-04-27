@@ -14,7 +14,7 @@ cuda = torch.cuda.is_available()
 
 test_losses = AverageMeter()
 
-def test(device, model, dir):
+def test(device, model):
     num_joints = 17
 
     model.eval()
@@ -56,9 +56,7 @@ def main():
     model = CPM_UNet(num_stages=3, num_joints=17).to(device)
     model.load_state_dict(torch.load(MODEL_DIR))
 
-    test_anno_dir = os.path.join('data', 'test_prediction.json')
-
-    test(device, model, test_anno_dir)
+    test(device, model)
 
 
 
