@@ -6,7 +6,6 @@ import numpy as np
 import json
 import os
 
-from net import CPM_UNet
 from load_data import test_OMC
 from utils import AverageMeter, show_heatmaps, offset_orig_coords
 
@@ -37,7 +36,7 @@ def test(device, model, dir):
         landmarks = []
         for joint_num in range(num_joints):
             pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
-                                        img_shape))
+                                        pred_hmap.shape[:2]))
 
             pair = pair * scale
             pair -= offset
