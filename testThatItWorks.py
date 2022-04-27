@@ -33,10 +33,12 @@ def test(device, model):
         pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
         offset, scale = offset_orig_coords(img_shape, pred_hmap.shape[0])
 
+        print()
+
         pred_landmarks = []
         for joint_num in range(num_joints):
             pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
-                                        img_shape))
+                                        pred_hmap.shape[:2]))
 
             pair = pair * scale
             pair -= offset
