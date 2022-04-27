@@ -177,6 +177,87 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
 
 
 
+def crop_test(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
+
+    bbox = ele_anno['bbox']
+    cen = np.array((1,2))
+    cen[0] = int(bbox[0] + bbox[2]/2)
+    cen[1] = int(bbox[1] + bbox[3]/2)
+
+
+    H,W = img.shape[0], img.shape[1]
+    # topleft:x1,y1  bottomright:x2,y2
+    bb_x1 = int(bbox[0])
+    bb_y1 = int(bbox[1])
+    bb_x2 = int(bbox[0] + bbox[2])
+    bb_y2 = int(bbox[1] + bbox[3])
+
+    newX = bb_x2-bb_x1
+    newY = bb_y2-bb_y1
+    if(newX>newY):
+        dif = newX-newY
+        bb_y1-=int(dif/2)
+        bb_y2+=int(dif/2)
+    else:
+        dif=newY-newX
+        bb_x1-=int(dif/2)
+        bb_x2+=int(dif/2)
+
+    if bb_x1<0 or bb_x2>W or bb_y1<0 or bb_y2>H:
+        pad = int(max(-bb_x1, bb_x2-W, -bb_y1, bb_y2-H))
+        img = np.pad(img, ((pad, pad),(pad,pad),(0,0)), 'constant')
+    else:
+        pad = 0
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show() 
+    img = img[bb_y1+pad:bb_y2+pad, bb_x1+pad:bb_x2+pad]
+
+    #ys = np.array([ys[i]-bb_y1 for i in range(len(ys)) if i in pts_nonzero])
+    bbox[0] -= bb_x1
+    bbox[1] -= bb_y1
+    
+
+    cen[0] = int((bb_x2-bb_x1)/2)
+    cen[1] = int((bb_y2-bb_y1)/2)
+
+
+    # resize
+    H,W = img.shape[0], img.shape[1]
+    cen[0] = cen[0]*crop_size/W
+    cen[1] = cen[1]*crop_size/H
+    
+    # print("scale", scale)
+    # print("bbox", bbox)
+
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+    img = cv2.resize(img, (crop_size, crop_size))
+    # image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # plt.imshow(image)
+    # plt.show()
+
+    return img, cen
+
+
+def offset_orig_coords(img_shape):
+    '''
+    Assume joints is shape 17 x 2 where first dimension is x and second dim is y
+    '''
+    offset_pair = np.zeros(2)
+    height, width = img_shape
+    if height > width:
+        scale = height / 256
+        offset = (height - width) // 2
+        offset_pair[0] = offset
+    else:
+        scale = width / 256
+        offset = (width - height) // 2
+        offset_pair[1] = offset
+
+    return offset_pair, scale
+
 
 def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
     '''

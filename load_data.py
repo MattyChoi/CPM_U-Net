@@ -1,4 +1,3 @@
-from cv2 import CAP_PROP_OPENNI_CIRCLE_BUFFER
 from torch.utils.data import Dataset
 import torch.utils.data as torchdata
 import torch
@@ -69,6 +68,56 @@ class OMC(Dataset):
         centermap = np.stack(centermap, axis=0)
 
         return imgs, heatmaps, centermap
+
+
+class test_OMC(Dataset):
+    """
+    Dataset for OMC
+    """
+    def __init__(self, is_training=False):
+        super(test_OMC, self).__init__()
+
+        dir = os.path.join(dataset_dir, 'test_annotation.json')
+
+        with open(dir) as f:
+            dic = json.load(f)
+            self.feature_list = [item for item in dic['data']]
+
+
+    def __getitem__(self, index):
+        features = self.feature_list[index]
+        input_shape = (256, 256)
+
+        img_folder_dir = os.path.join(dataset_dir, 'test')
+        img_dir = os.path.join(img_folder_dir, features['file'])
+        img = mpimg.imread(img_dir)
+        img_shape = img.shape
+
+        # generate crop image
+        #print(img)
+        img_crop, cen_crop = utils.crop_test(img, features)
+        cen_crop = np.array(cen_crop)
+        
+        test_img = np.transpose(img_crop, (2,0,1))/255.0
+
+        test_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
+        test_centermap = np.expand_dims(test_centermap, axis=0)
+
+        return test_img, test_centermap, img_shape
+
+
+    def __len__(self):
+        return len(self.feature_list)
+
+
+    def collate_fn(self, batch):
+        imgs, centermap, img_shape = list(zip(*batch))
+
+        imgs = np.stack(imgs, axis=0)
+        centermap = np.stack(centermap, axis=0)
+        img_shape = np.stack(img_shape, axis=0)
+
+        return imgs, centermap
 
 def main():
     #plt.ion()
