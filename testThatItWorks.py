@@ -28,7 +28,7 @@ def test(device, model, dir):
 
         pred_heatmaps = model(img, cmap)
         pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
-        offset, scale = offset_orig_coords(img_shape)
+        offset, scale = offset_orig_coords(img_shape, pred_hmap.shape[0])
 
         pred_landmarks = []
         for joint_num in range(num_joints):

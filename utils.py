@@ -307,18 +307,18 @@ def crop_check(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     return img, cen, pts
 
 
-def offset_orig_coords(img_shape):
+def offset_orig_coords(img_shape, hmap_size):
     '''
     Assume joints is shape 17 x 2 where first dimension is x and second dim is y
     '''
     offset_pair = np.zeros(2)
     height, width = img_shape
     if height > width:
-        scale = height / 256
+        scale = height / hmap_size
         offset = (height - width) // 2
         offset_pair[0] = offset
     else:
-        scale = width / 256
+        scale = width / hmap_size
         offset = (width - height) // 2
         offset_pair[1] = offset
 

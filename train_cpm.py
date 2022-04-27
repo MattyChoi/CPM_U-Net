@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.utils.data as torch_data
+import os
 
 from cpm import CPM
 from load_data import OMC
@@ -91,7 +92,7 @@ def main():
         if (e+1) % 1 == 0:
             test(device, model, criterion)
             print('Epoch: {} || Testing Loss: {}'.format(e+1, test_losses.avg))
-            path_ckpt = './weights/cpm_epoch_' + str(e+1)
+            pack_ckpt = os.path.join('weights', 'cpm_epoch_.json' + str(e+1))
             if test_losses.avg < best_test_loss:
                 # save the model
                 save_checkpoint(model.state_dict(), True, path_ckpt)
