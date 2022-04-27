@@ -26,7 +26,6 @@ def test(device, model, dir):
         dic = json.load(f)
 
     for i, (img, cmap, img_shape) in enumerate(test_loader):
-        img_shape = img.shape
         img = torch.FloatTensor(img).to(device)
         cmap = torch.FloatTensor(cmap).to(device)
 
