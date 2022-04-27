@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.data as torch_data
-import numpy as np
 
 from net import CPM_UNet
 from load_data import OMC
 from utils import AverageMeter, show_heatmaps, save_checkpoint
+from tqdm import tqdm
 
 cuda = torch.cuda.is_available()
 
@@ -20,21 +19,22 @@ def train(device, optimizer, model, criterion):
     train_loader = torch_data.DataLoader(train_dataset, batch_size=1, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=1)
 
-    for img, hmap, cmap in train_loader:
-        img = torch.FloatTensor(img).to(device)
-        hmap = torch.FloatTensor(hmap).to(device)
-        cmap = torch.FloatTensor(cmap).to(device)
+    with tqdm(train_loader, unit="batch") as batch:
+        for img, hmap, cmap in batch:
+            img = torch.FloatTensor(img).to(device)
+            hmap = torch.FloatTensor(hmap).to(device)
+            cmap = torch.FloatTensor(cmap).to(device)
 
-        pred_heatmaps = model(img, cmap)
+            pred_heatmaps = model(img, cmap)
 
-        losses = [criterion(hmap, pred) for pred in pred_heatmaps]
-        loss = sum(losses)
+            losses = [criterion(hmap, pred) for pred in pred_heatmaps]
+            loss = sum(losses)
 
-        train_losses.update(loss.item(), img.size(0))
+            train_losses.update(loss.item(), img.size(0))
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
 
 def test(device, model, criterion):
