@@ -6,7 +6,7 @@ import numpy as np
 import json
 import os
 
-from cpm import CPM
+from models.cpm import CPM
 from load_data import sanity_check_OMC
 from utils import AverageMeter, show_heatmaps, offset_orig_coords
 

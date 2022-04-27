@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.utils.data as torch_data
 import os
 
-from cpm import CPM
+from models.cpm import CPM
 from load_data import OMC
 from utils import AverageMeter, show_heatmaps, save_checkpoint
 from tqdm import tqdm
