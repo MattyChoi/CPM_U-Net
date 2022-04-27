@@ -8,8 +8,7 @@ class CPM_UNet(nn.Module):
     def __init__(self, num_stages, num_joints):
         super(CPM_UNet, self).__init__()
         self.num_stages = num_stages
-        self.heatmaps = []
-
+        
         # replace self.features with a unet architecture
         # self.features = CPM_ImageFeatures()
         self.features = UNet(3)
@@ -18,16 +17,17 @@ class CPM_UNet(nn.Module):
         self.stageT = CPM_StageT(num_joints)
 
     def forward(self, image, center_map):
+        heatmaps = []
         stage1_maps = self.stage1(image)
         features = self.features(image)
 
-        self.heatmaps.append(stage1_maps)
+        heatmaps.append(stage1_maps)
 
         for _ in range(self.num_stages - 1):
-            cur_map = self.stageT(features, self.heatmaps[-1], center_map)
-            self.heatmaps.append(cur_map)
+            cur_map = self.stageT(features, heatmaps[-1], center_map)
+            heatmaps.append(cur_map)
 
-        return self.heatmaps
+        return heatmaps
 
 
 class CPM_ImageFeatures(nn.Module):
@@ -39,11 +39,13 @@ class CPM_ImageFeatures(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.conv3 = nn.Conv2d(128, 128, kernel_size=9, padding=4)
         self.pool3 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.conv4 = nn.Conv2d(128, 32, kernel_size=5, padding=2)
 
     def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = self.pool3(F.relu(self.conv3(x)))
+        x = F.relu(self.conv4(x))
         return x
 
 

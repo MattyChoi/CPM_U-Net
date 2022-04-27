@@ -1,3 +1,4 @@
+from cv2 import CAP_PROP_OPENNI_CIRCLE_BUFFER
 from torch.utils.data import Dataset
 import torch.utils.data as torchdata
 import torch
@@ -46,7 +47,7 @@ class OMC(Dataset):
         cen_crop = np.array(cen_crop)
         
         train_img = np.transpose(img_crop, (2,0,1))/255.0
-
+        
         train_heatmaps = utils.gen_hmaps(np.zeros(input_shape), pts_crop)
         train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
 

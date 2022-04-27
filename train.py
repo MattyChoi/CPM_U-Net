@@ -20,19 +20,20 @@ def train(device, optimizer, model, criterion):
     train_loader = torch_data.DataLoader(train_dataset, batch_size=1, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=1)
 
-    for img, heatmap, centermap in train_loader:
+    for img, hmap, cmap in train_loader:
         img = torch.FloatTensor(img).to(device)
-        ground_hmap = torch.FloatTensor(heatmap).to(device)
-        centermap = torch.FloatTensor(centermap).to(device)
+        hmap = torch.FloatTensor(hmap).to(device)
+        cmap = torch.FloatTensor(cmap).to(device)
 
-        pred_heatmaps = model(img, centermap)
+        pred_heatmaps = model(img, cmap)
 
-        losses = [criterion(ground_hmap, pred) for pred in pred_heatmaps]
-        loss = losses[0] + losses[1] + losses[2]
+        losses = [criterion(hmap, pred) for pred in pred_heatmaps]
+        loss = sum(losses)
+
         train_losses.update(loss.item(), img.size(0))
 
         optimizer.zero_grad()
-        loss.backward(retain_graph=True)
+        loss.backward()
         optimizer.step()
 
 

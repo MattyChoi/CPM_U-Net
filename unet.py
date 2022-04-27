@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class UNet(nn.Module):
     def __init__(self, n_channels):
-        super(UNet, self).__init__()
+        super().__init__()
         self.n_channels = n_channels
 
         self.inc = Block(n_channels, 64)
