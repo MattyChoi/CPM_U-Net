@@ -43,21 +43,15 @@ def test(device, model, criterion):
     test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
-    for i, (img, heatmap, centermap) in enumerate(test_loader):
+    for img, hmap, cmap in test_loader:
         img = torch.FloatTensor(img).to(device)
-        heatmap = torch.FloatTensor(heatmap).to(device)
-        centermap = torch.FloatTensor(centermap).to(device)
+        hmap = torch.FloatTensor(hmap).to(device)
+        cmap = torch.FloatTensor(cmap).to(device)
 
-        score1, score2, score3, score4, score5, score6 = model(img,centermap)
+        pred_heatmaps = model(img, cmap)
+        losses = [criterion(hmap, pred) for pred in pred_heatmaps]
+        loss = sum(losses)
 
-        loss1 = criterion(heatmap, score1)
-        loss2 = criterion(heatmap, score2)
-        loss3 = criterion(heatmap, score3)
-        loss4 = criterion(heatmap, score4)
-        loss5 = criterion(heatmap, score5)
-        loss6 = criterion(heatmap, score6)
-
-        loss = loss1 + loss2 + loss3 + loss4 + loss5 + loss6
         test_losses.update(loss.item(), img.size(0))
 
         # show predicted heatmaps 

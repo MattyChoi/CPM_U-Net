@@ -45,7 +45,7 @@ class CPM_ImageFeatures(nn.Module):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = self.pool3(F.relu(self.conv3(x)))
-        x = F.relu(self.conv4(x))
+        # x = F.relu(self.conv4(x))
         return x
 
 
