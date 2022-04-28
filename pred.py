@@ -44,8 +44,8 @@ def test(device, model, dir):
             pair -= offset
             y, x = pair
 
-            landmarks.append(int(x))
-            landmarks.append(int(y))
+            landmarks.append(int(x + bbox[0]))
+            landmarks.append(int(y + bbox[1]))
 
         dic['data'][i]['landmarks'] = landmarks
         

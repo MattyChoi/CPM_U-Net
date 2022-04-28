@@ -320,11 +320,11 @@ def offset_orig_coords(shape, hmap_size):
     if height > width:
         scale = height / hmap_size
         offset = (height - width) // 2
-        offset_pair[0] = offset
+        offset_pair[1] = offset
     else:
         scale = width / hmap_size
         offset = (width - height) // 2
-        offset_pair[1] = offset
+        offset_pair[0] = offset
 
     return offset_pair, scale
 

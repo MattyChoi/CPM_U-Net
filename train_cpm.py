@@ -20,25 +20,8 @@ def train(device, optimizer, model, criterion):
     train_loader = torch_data.DataLoader(train_dataset, batch_size=8, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=1)
 
-    # with tqdm(train_loader, unit="batch") as batch:
-    #     for img, hmap, cmap in batch:
-    #         img = torch.FloatTensor(img).to(device)
-    #         hmap = torch.FloatTensor(hmap).to(device)
-    #         cmap = torch.FloatTensor(cmap).to(device)
-
-    #         pred_heatmaps = model(img, cmap)
-
-    #         losses = [criterion(hmap, pred) for pred in pred_heatmaps]
-    #         loss = sum(losses)
-
-    #         train_losses.update(loss.item(), img.size(0))
-
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-
     with tqdm(train_loader, unit="batch") as batch:
-        for i, (img, hmap, cmap) in enumerate(batch):
+        for img, hmap, cmap in batch:
             img = torch.FloatTensor(img).to(device)
             hmap = torch.FloatTensor(hmap).to(device)
             cmap = torch.FloatTensor(cmap).to(device)
@@ -47,12 +30,6 @@ def train(device, optimizer, model, criterion):
 
             losses = [criterion(hmap, pred) for pred in pred_heatmaps]
             loss = sum(losses)
-
-            if i % 500 == 0:
-                pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:17]
-                show_heatmaps(img[0].cpu().detach().numpy().transpose((1,2,0)), pred_hmap)
-                show_heatmaps(img[0].cpu().detach().numpy().transpose((1,2,0)), hmap[0].cpu().detach().numpy().transpose((1,2,0)))
-                print([l.item() for l in losses])
 
             train_losses.update(loss.item(), img.size(0))
 
