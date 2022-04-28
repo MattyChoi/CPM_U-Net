@@ -180,6 +180,8 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
 def crop_test(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
 
     bbox = ele_anno['bbox']
+    bb = bbox.copy()
+
     cen = np.array((1,2))
     cen[0] = int(bbox[0] + bbox[2]/2)
     cen[1] = int(bbox[1] + bbox[3]/2)
@@ -238,7 +240,7 @@ def crop_test(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     # plt.imshow(image)
     # plt.show()
 
-    return img, cen
+    return img, cen, bb
 
 
 def crop_check(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
@@ -246,6 +248,8 @@ def crop_check(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     pts = ele_anno['landmarks']
 
     bbox = ele_anno['bbox']
+    bb = bbox.copy()
+
     cen = np.array((1,2))
     cen[0] = int(bbox[0] + bbox[2]/2)
     cen[1] = int(bbox[1] + bbox[3]/2)
@@ -304,15 +308,15 @@ def crop_check(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     # plt.imshow(image)
     # plt.show()
 
-    return img, cen, pts
+    return img, cen, pts, bb
 
 
-def offset_orig_coords(img_shape, hmap_size):
+def offset_orig_coords(shape, hmap_size):
     '''
     Assume joints is shape 17 x 2 where first dimension is x and second dim is y
     '''
     offset_pair = np.zeros(2)
-    height, width = img_shape
+    height, width = shape
     if height > width:
         scale = height / hmap_size
         offset = (height - width) // 2

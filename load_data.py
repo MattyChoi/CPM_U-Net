@@ -94,11 +94,10 @@ class test_OMC(Dataset):
         img_folder_dir = os.path.join(dataset_dir, 'test')
         img_dir = os.path.join(img_folder_dir, features['file'])
         img = mpimg.imread(img_dir)
-        img_shape = img.shape
 
         # generate crop image
         #print(img)
-        img_crop, cen_crop = utils.crop_test(img, features)
+        img_crop, cen_crop, bb = utils.crop_test(img, features)
         cen_crop = np.array(cen_crop)
         
         test_img = np.transpose(img_crop, (2,0,1))/255.0
@@ -106,7 +105,7 @@ class test_OMC(Dataset):
         test_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
         test_centermap = np.expand_dims(test_centermap, axis=0)
 
-        return test_img, test_centermap, img_shape
+        return test_img, test_centermap, bb
 
 
     def __len__(self):
@@ -114,13 +113,13 @@ class test_OMC(Dataset):
 
 
     def collate_fn(self, batch):
-        imgs, centermap, img_shape = list(zip(*batch))
+        imgs, centermap, bb = list(zip(*batch))
 
         imgs = np.stack(imgs, axis=0)
         centermap = np.stack(centermap, axis=0)
-        img_shape = np.stack(img_shape, axis=0)
+        bb = np.stack(bb, axis=0)
 
-        return imgs, centermap
+        return imgs, centermap, bb
 
 
 class sanity_check_OMC(Dataset):
@@ -144,19 +143,18 @@ class sanity_check_OMC(Dataset):
         img_folder_dir = os.path.join(dataset_dir, 'val')
         img_dir = os.path.join(img_folder_dir, features['file'])
         img = mpimg.imread(img_dir)
-        img_shape = img.shape
 
         # generate crop image
         #print(img)
-        img_crop, cen_crop, landmarks = utils.crop_check(img, features)
+        img_crop, cen_crop, landmarks, bb = utils.crop_check(img, features)
         cen_crop = np.array(cen_crop)
         
-        test_img = np.transpose(img_crop, (2,0,1))/255.0
+        test_img = np.transpose(img_crop, (2,0,1)) / 255.0
 
         test_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
         test_centermap = np.expand_dims(test_centermap, axis=0)
 
-        return test_img, test_centermap, img_shape, landmarks
+        return test_img, test_centermap, bb, landmarks
 
 
     def __len__(self):
@@ -164,14 +162,14 @@ class sanity_check_OMC(Dataset):
 
 
     def collate_fn(self, batch):
-        imgs, centermap, img_shape, landmarks = list(zip(*batch))
+        imgs, centermap, bb, landmarks = list(zip(*batch))
 
         imgs = np.stack(imgs, axis=0)
         centermap = np.stack(centermap, axis=0)
-        img_shape = np.stack(img_shape, axis=0)
+        bb = np.stack(bb, axis=0)
         landmarks = np.stack(landmarks, axis=0)
 
-        return imgs, centermap, img_shape, landmarks
+        return imgs, centermap, bb, landmarks
 
 
 def main():
