@@ -15,7 +15,7 @@ cuda = torch.cuda.is_available()
 
 test_losses = AverageMeter()
 
-def test(device, model, dir):
+def test(device, model, dir, store_pred_json=True):
     num_joints = 17
 
     model.eval()
@@ -23,8 +23,10 @@ def test(device, model, dir):
     test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
-    with open(dir) as f:
-        dic = json.load(f)
+
+    if store_pred_json:
+        with open(dir) as f:
+            dic = json.load(f)
 
     for i, (img, cmap, bbox) in enumerate(test_loader):
         img = torch.FloatTensor(img).to(device)
@@ -32,23 +34,26 @@ def test(device, model, dir):
         bbox = bbox[0]
 
         pred_heatmaps = model(img, cmap)
-        pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
-
-        landmarks = get_landmarks_from_preds(pred_hmap, bbox, num_joints=num_joints)
-        dic['data'][i]['landmarks'] = landmarks
+        
+        if store_pred_json:
+            pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
+            landmarks = get_landmarks_from_preds(pred_hmap, bbox, num_joints=num_joints)
+            dic['data'][i]['landmarks'] = landmarks
         
         if i % 1000 == 0: print("Iteration " + str(i))
 
     # dump into json file
-    with open('test_annotation.json', 'w') as outfile:
-        json.dump(dic, outfile)
+
+    if store_pred_json:
+        with open('test_prediction.json', 'w') as outfile:
+            json.dump(dic, outfile)
 
             
 
 def main():
     device = 'cuda:0' if cuda else 'cpu'
     
-    MODEL_DIR = os.path.join('weights', 'cpm_epoch_15_best.pkl')
+    MODEL_DIR = os.path.join('weights', 'cpm_unet.pkl')
     
     model = CPM(num_stages=3, num_joints=17).to(device)
     # model = CPM_UNet(num_stages=3, num_joints=17).to(device)
@@ -56,7 +61,7 @@ def main():
 
     test_anno_dir = os.path.join('data', 'test_prediction.json')
 
-    test(device, model, test_anno_dir)
+    test(device, model, test_anno_dir, )
 
 
 

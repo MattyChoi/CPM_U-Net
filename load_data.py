@@ -72,7 +72,6 @@ class OMC_CPM(Dataset):
         return imgs, heatmaps, centermap
 
 
-
 class OMC_CPM_UNet(Dataset):
     """
     Dataset for OMC

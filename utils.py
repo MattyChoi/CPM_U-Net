@@ -362,25 +362,20 @@ def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
     plt.figure(num_fig)
     for i in range(heatmaps.shape[2]):
         plt.subplot(4, 5, i + 1)
-        plt.title(dict_name[i])
+        plt.title(dict_name[i], fontdict = {'fontsize' : 10})
         if i == 0:
             plt.imshow(img)
         else:
             plt.imshow(heatmaps[:, :, i - 1])
         plt.axis('off')
+
+    plt.subplots_adjust(left=0.1,
+                        bottom=0.1, 
+                        right=0.9, 
+                        top=0.9, 
+                        wspace=0.4, 
+                        hspace=0.4)
     plt.show()
-
-
-def hmaps_to_coords(heatmaps):
-    num_joints = heatmaps.shape[2] - 1
-    coord_joints = np.zeros((num_joints, 2))
-
-    for joint_num in range(num_joints):
-        y, x = np.unravel_index(np.argmax(heatmaps[:, :, joint_num]),
-                                (heatmaps.shape[0], heatmaps.shape[1]))
-        coord_joints[joint_num] = [x, y]
-
-    return coord_joints
 
 
 def get_landmarks_from_preds(pred_hmap, bbox, num_joints=17):
@@ -402,13 +397,7 @@ def get_landmarks_from_preds(pred_hmap, bbox, num_joints=17):
     return landmarks
     
 
-def visualize_result(test_img, FLAGS, stage_heatmap_np):
-    last_heatmap = stage_heatmap_np[-1][0, :, :, 0: FLAGS.joints].reshape(
-        (FLAGS.hmap_size, FLAGS.hmap_size, FLAGS.joints))
-    last_heatmap = cv2.resize(last_heatmap, (test_img.shape[1], test_img.shape[0]))
-
-    joint_coord_set = np.zeros((FLAGS.joints, 2))
-    
+def visualize_result(test_img, pred_hmap):
     joint_color_code = [[139, 53, 255],
                         [0, 56, 255],
                         [43, 140, 237],
@@ -416,18 +405,19 @@ def visualize_result(test_img, FLAGS, stage_heatmap_np):
                         [147, 147, 0],
                         [70, 17, 145]]
 
-    for joint_num in range(FLAGS.joints):
-        joint_coord = np.unravel_index(np.argmax(last_heatmap[:, :, joint_num]),
-                                        (test_img.shape[0], test_img.shape[1]))
-        joint_coord_set[joint_num, :] = [joint_coord[0], joint_coord[1]]
+    hmap_size, _, num_joints = pred_hmap.shape
+    hmap_size *= 16
+    num_joints -= 1
 
-        color_code_num = (joint_num // 4)
-        if joint_num in [0, 4, 8, 12, 16]:
-            joint_color = list(map(lambda x: x + 35 * (joint_num % 4), joint_color_code[color_code_num % 6 ]))
-            cv2.circle(test_img, center=(joint_coord[1], joint_coord[0]), radius=5, color=joint_color, thickness=-1)
-        else:
-            joint_color = list(map(lambda x: x + 35 * (joint_num % 4), joint_color_code[color_code_num % 6]))
-            cv2.circle(test_img, center=(joint_coord[1], joint_coord[0]), radius=5, color=joint_color, thickness=-1)
-        print(joint_coord, joint_num)
+    test_img = cv2.resize(test_img, (hmap_size, hmap_size), interpolation = cv2.INTER_AREA)
+    test_img = np.ascontiguousarray(test_img * 255, dtype=np.uint8)
 
-    return test_img
+    for joint_num in range(num_joints):
+        pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]), pred_hmap.shape[:2]))
+        joint_color = list(map(lambda x: x + 35 * (joint_num % 4), joint_color_code[joint_num % 6]))
+        cv2.circle(test_img, center=(pair[1] * 16, pair[0] * 16), radius=5, color=joint_color, thickness=-1)
+
+    while True:
+        cv2.imshow('demo_img', test_img)
+        if cv2.waitKey(0) == ord('q'): break
+    cv2.destroyAllWindows()
