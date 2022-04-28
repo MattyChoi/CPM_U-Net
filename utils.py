@@ -369,12 +369,12 @@ def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
             plt.imshow(heatmaps[:, :, i - 1])
         plt.axis('off')
 
-    plt.subplots_adjust(left=0.1,
-                        bottom=0.1, 
-                        right=0.9, 
-                        top=0.9, 
-                        wspace=0.4, 
-                        hspace=0.4)
+    # plt.subplots_adjust(left=0.1,
+    #                     bottom=0.1, 
+    #                     right=0.9, 
+    #                     top=0.9, 
+    #                     wspace=0.4, 
+    #                     hspace=0.4)
     plt.show()
 
 
@@ -415,7 +415,7 @@ def visualize_result(test_img, pred_hmap):
     for joint_num in range(num_joints):
         pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]), pred_hmap.shape[:2]))
         joint_color = list(map(lambda x: x + 35 * (joint_num % 4), joint_color_code[joint_num % 6]))
-        cv2.circle(test_img, center=(pair[1] * 16, pair[0] * 16), radius=5, color=joint_color, thickness=-1)
+        cv2.circle(test_img, center=(pair[1] * 16, pair[0] * 16), radius=10, color=joint_color, thickness=-1)
 
     while True:
         cv2.imshow('demo_img', test_img)

@@ -27,7 +27,7 @@ def demo(model):
         bbox = bbox[0]
 
         pred_heatmaps = model(test_img, cmap)
-        pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
+        pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))
         img = img[0].transpose((1,2,0))
 
         show_heatmaps(img, pred_hmap)
@@ -38,6 +38,7 @@ def main():
     # MODEL_DIR = os.path.join('weights', 'cpm_unet.pkl')
     MODEL_DIR = os.path.join('weights', 'cpm_baseline.pkl')
     
+    model = CPM_UNet(num_stages=3, num_joints=17)
     model = CPM(num_stages=3, num_joints=17)
     
     # model = CPM_UNet(num_stages=3, num_joints=17)
