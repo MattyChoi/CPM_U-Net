@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class CPM_UNet(nn.Module):
     def __init__(self, num_stages, num_joints):
         super(CPM_UNet, self).__init__()
@@ -88,7 +89,6 @@ class CPM_StageT(nn.Module):
         x = F.relu(self.conv4(x))
         x = self.conv5(x)
         return x
-
 
 
 class UNet(nn.Module):

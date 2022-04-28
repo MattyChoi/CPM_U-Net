@@ -383,6 +383,24 @@ def hmaps_to_coords(heatmaps):
     return coord_joints
 
 
+def get_landmarks_from_preds(pred_hmap, bbox, num_joints=17):
+    resize_shape = (bbox[3], bbox[2])
+    offset, scale = offset_orig_coords(resize_shape, pred_hmap.shape[0])
+
+    landmarks = []
+    for joint_num in range(num_joints):
+        pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
+                                    pred_hmap.shape[:2]))
+
+        pair = pair * scale
+        pair -= offset
+        y, x = pair
+
+        landmarks.append(int(x + bbox[0]))
+        landmarks.append(int(y + bbox[1]))
+
+    return landmarks
+    
 
 def visualize_result(test_img, FLAGS, stage_heatmap_np):
     last_heatmap = stage_heatmap_np[-1][0, :, :, 0: FLAGS.joints].reshape(

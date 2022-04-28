@@ -8,7 +8,7 @@ import os
 
 from models.cpm import CPM
 from load_data import sanity_check_OMC
-from utils import AverageMeter, show_heatmaps, offset_orig_coords
+from utils import AverageMeter, show_heatmaps, get_landmarks_from_preds
 
 cuda = torch.cuda.is_available()
 
@@ -24,25 +24,13 @@ def test(device, model):
         img = torch.FloatTensor(img).to(device)
         cmap = torch.FloatTensor(cmap).to(device)
         bbox = bbox[0]
-        resize_shape = (bbox[3], bbox[2])
         landmarks = landmarks[0]
 
         pred_heatmaps = model(img, cmap)
         pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))[:,:,:num_joints]
         show_heatmaps(img[0].cpu().detach().numpy().transpose((1,2,0)), pred_hmap)
-        offset, scale = offset_orig_coords(resize_shape, pred_hmap.shape[0])
 
-        pred_landmarks = []
-        for joint_num in range(num_joints):
-            pair = np.array(np.unravel_index(np.argmax(pred_hmap[:, :, joint_num]),
-                                        pred_hmap.shape[:2]))
-            
-            pair = pair * scale
-            pair -= offset
-            y, x = pair
-
-            pred_landmarks.append(int(x + bbox[0]))
-            pred_landmarks.append(int(y + bbox[1]))
+        pred_landmarks = get_landmarks_from_preds(pred_hmap, bbox, num_joints=17)
 
         print(pred_landmarks)
         print(landmarks)
