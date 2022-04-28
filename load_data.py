@@ -10,12 +10,75 @@ import utils
 
 dataset_dir = "./data"
 
-class OMC(Dataset):
+
+class OMC_CPM(Dataset):
     """
     Dataset for OMC
     """
     def __init__(self, is_training=True):
-        super(OMC, self).__init__()
+        super(OMC_CPM, self).__init__()
+        self.is_training = is_training
+
+        if self.is_training:
+            dir = os.path.join(dataset_dir, 'train_annotation.json')
+        else:
+            dir = os.path.join(dataset_dir, 'val_annotation.json')
+
+        with open(dir) as f:
+            dic = json.load(f)
+            self.feature_list = [item for item in dic['data']]
+
+
+    def __getitem__(self, index):
+        features = self.feature_list[index]
+        input_shape = (256,256)
+        hmap_shape = (32,32)
+
+        if(self.is_training==True):
+            img_folder_dir = os.path.join(dataset_dir, 'train')
+        else:
+            img_folder_dir = os.path.join(dataset_dir, 'val')
+        img_dir = os.path.join(img_folder_dir, features['file'])
+        img = mpimg.imread(img_dir)
+
+        # generate crop image
+        #print(img)
+        img_crop, pts_crop, cen_crop = utils.crop(img, features)
+        pts_crop = np.array(pts_crop)
+        cen_crop = np.array(cen_crop)
+        
+        train_img = np.transpose(img_crop, (2,0,1))/255.0
+        train_heatmaps = utils.gen_hmaps(np.zeros(hmap_shape), pts_crop/8)
+        
+        train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
+
+        train_centermap = utils.gen_cmap(np.zeros(input_shape), cen_crop)
+        train_centermap = np.expand_dims(train_centermap, axis=0)
+
+        return train_img, train_heatmaps, train_centermap
+
+
+    def __len__(self):
+        return len(self.feature_list)
+
+
+    def collate_fn(self, batch):
+        imgs, heatmaps, centermap = list(zip(*batch))
+
+        imgs = np.stack(imgs, axis=0)
+        heatmaps = np.stack(heatmaps, axis=0)
+        centermap = np.stack(centermap, axis=0)
+
+        return imgs, heatmaps, centermap
+
+
+
+class OMC_CPM_UNet(Dataset):
+    """
+    Dataset for OMC
+    """
+    def __init__(self, is_training=True):
+        super(OMC_CPM_UNet, self).__init__()
         self.is_training = is_training
 
         if self.is_training:
@@ -48,8 +111,7 @@ class OMC(Dataset):
         train_img = np.transpose(img_crop, (2,0,1))/255.0
         
         # for net.py, use input_shape
-        # train_heatmaps = utils.gen_hmaps(np.zeros(input_shape), pts_crop)
-        train_heatmaps = utils.gen_hmaps(np.zeros((32,32)), pts_crop/8)
+        train_heatmaps = utils.gen_hmaps(np.zeros(input_shape), pts_crop)
         
         train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
 

@@ -4,7 +4,7 @@ import torch.utils.data as torch_data
 import os
 
 from models.net import CPM_UNet
-from load_data import OMC
+from load_data import OMC_CPM_UNet
 from utils import AverageMeter, show_heatmaps, save_checkpoint
 from tqdm import tqdm
 
@@ -16,7 +16,7 @@ test_losses = AverageMeter()
 
 def train(device, optimizer, model, criterion):
     model.train()
-    train_dataset = OMC(is_training=True)
+    train_dataset = OMC_CPM_UNet(is_training=True)
     train_loader = torch_data.DataLoader(train_dataset, batch_size=1, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=1)
 
@@ -40,7 +40,7 @@ def train(device, optimizer, model, criterion):
 
 def test(device, model, criterion):
     model.eval()
-    test_dataset = OMC(is_training=False)
+    test_dataset = OMC_CPM_UNet(is_training=False)
     test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
@@ -54,21 +54,6 @@ def test(device, model, criterion):
         loss = sum(losses)
 
         test_losses.update(loss.item(), img.size(0))
-
-        # show predicted heatmaps 
-        # if i == 0:
-        #     heatmaps_pred_copy = score6[0]
-        #     heatmaps_copy = heatmap[0] 
-        #     img_copy = img[0]
-        #     heatmaps_pred_np = heatmaps_pred_copy.detach().cpu().numpy()
-        #     heatmaps_pred_np = np.transpose(heatmaps_pred_np, (1, 2, 0))
-        #     heatmaps_np = heatmaps_copy.detach().cpu().numpy()
-        #     heatmaps_np = np.transpose(heatmaps_np, (1, 2, 0))
-        #     img_np = img_copy.detach().cpu().numpy()
-        #     img_np = np.transpose(img_np, (1, 2, 0))
-            
-        #     show_heatmaps(img_np, heatmaps_pred_np, num_fig=1)
-        #     show_heatmaps(img_np, heatmaps_np, num_fig=2)
             
 
 def main():

@@ -60,7 +60,7 @@ def test(device, model, dir):
 def main():
     device = 'cuda:0' if cuda else 'cpu'
     
-    MODEL_DIR = os.path.join('weights', 'cpm_epoch_1_best.pkl')
+    MODEL_DIR = os.path.join('weights', 'cpm_epoch_3_best.pkl')
     
     model = CPM(num_stages=3, num_joints=17).to(device)
     model.load_state_dict(torch.load(MODEL_DIR))

@@ -84,9 +84,7 @@ def gen_hmaps(img, pts, sigma_valu=2):
     return heatmaps
 
 
-
-
-def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
+def crop(img, ele_anno, crop_size=256):
 
     # get bbox
     pts = ele_anno['landmarks']
@@ -176,8 +174,7 @@ def crop(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     return img, pts, cen
 
 
-
-def crop_test(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
+def crop_test(img, ele_anno, crop_size=256):
 
     bbox = ele_anno['bbox']
     bb = bbox.copy()
@@ -243,7 +240,7 @@ def crop_test(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
     return img, cen, bb
 
 
-def crop_check(img, ele_anno, use_rotate=True, use_hflip=False, crop_size=256):
+def crop_check(img, ele_anno, crop_size=256):
     # get bbox
     pts = ele_anno['landmarks']
 
@@ -372,7 +369,6 @@ def show_heatmaps(img, heatmaps, c=np.zeros((2)), num_fig=1):
             plt.imshow(heatmaps[:, :, i - 1])
         plt.axis('off')
     plt.show()
-
 
 
 def hmaps_to_coords(heatmaps):

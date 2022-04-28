@@ -4,7 +4,7 @@ import torch.utils.data as torch_data
 import os
 
 from models.cpm import CPM
-from load_data import OMC
+from load_data import OMC_CPM
 from utils import AverageMeter, show_heatmaps, save_checkpoint
 from tqdm import tqdm
 
@@ -16,7 +16,7 @@ test_losses = AverageMeter()
 
 def train(device, optimizer, model, criterion):
     model.train()
-    train_dataset = OMC(is_training=True)
+    train_dataset = OMC_CPM(is_training=True)
     train_loader = torch_data.DataLoader(train_dataset, batch_size=8, shuffle=True, \
                                         collate_fn=train_dataset.collate_fn, num_workers=1)
 
@@ -40,7 +40,7 @@ def train(device, optimizer, model, criterion):
 
 def test(device, model, criterion):
     model.eval()
-    test_dataset = OMC(is_training=False)
+    test_dataset = OMC_CPM(is_training=False)
     test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
@@ -78,7 +78,6 @@ def main():
             test(device, model, criterion)
             print('Epoch: {} || Testing Loss: {}'.format(e+1, test_losses.avg))
             pack_ckpt = os.path.join('weights', 'cpm_epoch_' + str(e+1))
-            print(pack_ckpt)
             if test_losses.avg < best_test_loss:
                 # save the model
                 save_checkpoint(model.state_dict(), True, pack_ckpt)
