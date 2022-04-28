@@ -18,7 +18,7 @@ def demo(model):
 
     model.eval()
     test_dataset = test_OMC()
-    test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=True, \
+    test_loader = torch_data.DataLoader(test_dataset, batch_size=1, shuffle=False, \
                                         collate_fn=test_dataset.collate_fn, num_workers=4)
 
     for i, (img, cmap, bbox) in enumerate(test_loader):
@@ -27,21 +27,22 @@ def demo(model):
         bbox = bbox[0]
 
         pred_heatmaps = model(test_img, cmap)
-        pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))
-        img = img[0].transpose((1,2,0))
 
-        show_heatmaps(img, pred_hmap)
-        visualize_result(img, pred_hmap)
+        if i > 1:
+            pred_hmap = pred_heatmaps[-1][0].cpu().detach().numpy().transpose((1,2,0))
+            img = img[0].transpose((1,2,0))
+            show_heatmaps(img, pred_hmap)
+            visualize_result(img, pred_hmap)
+        print(i)
             
 
 def main():
     # MODEL_DIR = os.path.join('weights', 'cpm_unet.pkl')
-    MODEL_DIR = os.path.join('weights', 'cpm_baseline.pkl')
-    
-    model = CPM_UNet(num_stages=3, num_joints=17)
-    model = CPM(num_stages=3, num_joints=17)
+    MODEL_DIR = os.path.join('weights', 'cpm_epoch_3_best.pkl')
     
     # model = CPM_UNet(num_stages=3, num_joints=17)
+    model = CPM(num_stages=3, num_joints=17)
+    
     model.load_state_dict(torch.load(MODEL_DIR))
 
     demo(model)

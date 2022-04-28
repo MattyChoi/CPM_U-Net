@@ -7,6 +7,7 @@ import json
 import os
 
 from models.cpm import CPM
+from models.net import CPM_UNet
 from load_data import sanity_check_OMC
 from utils import AverageMeter, show_heatmaps, get_landmarks_from_preds
 
@@ -42,9 +43,9 @@ def test(device, model):
 def main():
     device = 'cuda:0' if cuda else 'cpu'
     
-    MODEL_DIR = os.path.join('weights', 'cpm_epoch_1_best.pkl')
+    MODEL_DIR = os.path.join('weights', 'cpm_unet_epoch_1_best.pkl')
     
-    model = CPM(num_stages=3, num_joints=17).to(device)
+    model = CPM_UNet(num_stages=3, num_joints=17).to(device)
     model.load_state_dict(torch.load(MODEL_DIR))
 
     test(device, model)

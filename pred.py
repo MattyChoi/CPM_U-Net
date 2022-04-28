@@ -53,15 +53,15 @@ def test(device, model, dir, store_pred_json=True):
 def main():
     device = 'cuda:0' if cuda else 'cpu'
     
-    MODEL_DIR = os.path.join('weights', 'cpm_unet.pkl')
+    MODEL_DIR = os.path.join('weights', 'cpm_unet_epoch_1_best.pkl')
     
-    model = CPM(num_stages=3, num_joints=17).to(device)
-    # model = CPM_UNet(num_stages=3, num_joints=17).to(device)
+    # model = CPM(num_stages=3, num_joints=17).to(device)
+    model = CPM_UNet(num_stages=3, num_joints=17).to(device)
     model.load_state_dict(torch.load(MODEL_DIR))
 
     test_anno_dir = os.path.join('data', 'test_prediction.json')
 
-    test(device, model, test_anno_dir, )
+    test(device, model, test_anno_dir, store_pred_json=True)
 
 
 
