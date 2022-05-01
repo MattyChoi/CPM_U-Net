@@ -77,7 +77,7 @@ def main():
         if (e+1) % 1 == 0:
             test(device, model, criterion)
             print('Epoch: {} || Testing Loss: {}'.format(e+1, test_losses.avg))
-            pack_ckpt = os.path.join('weights', 'cpm_epoch_.json' + str(e+1))
+            pack_ckpt = os.path.join('weights', 'cpm_unet_epoch_' + str(e+1))
             if test_losses.avg < best_test_loss:
                 # save the model
                 save_checkpoint(model.state_dict(), True, pack_ckpt)
