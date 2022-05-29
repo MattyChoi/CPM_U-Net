@@ -207,7 +207,7 @@ class HRModule(nn.Module):
 
 
 class HRNet(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, params):
         super(HRNet, self).__init__()
 
         # stem net
@@ -219,8 +219,8 @@ class HRNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
         # stage 1
-        stage1_cfg = kwargs["STAGE1"]
-        block = blocks_dict["BLOCK"]
+        stage1_cfg = params["STAGE1"]
+        block = blocks_dict[stage1_cfg["BLOCK"]]
         num_channels = stage1_cfg['NUM_CHANNELS'][0]
         num_blocks = stage1_cfg["NUM_BLOCKS"][0]
         self.stage1 = make_layer(block, num_init_feat, num_channels, num_blocks)
@@ -230,9 +230,9 @@ class HRNet(nn.Module):
         self.stages = nn.ModuleList()
         self.transitions = nn.ModuleList()
         self.num_branches_lst = []
-        self.num_stages = kwargs["NUM_STAGES"]
+        self.num_stages = params["NUM_STAGES"]
         for i in range(self.num_stages - 1):
-            cfg = kwargs["STAGE" + str(i + 2)]
+            cfg = params["STAGE" + str(i + 2)]
             block = blocks_dict[cfg["BLOCK"]]
             num_channels = cfg["NUM_CHANNELS"]
             num_channels = [
@@ -249,13 +249,13 @@ class HRNet(nn.Module):
         # heatmap output
         self.final_layer = nn.Conv2d(
             in_channels=pre_stage_channels[0],
-            out_channels=kwargs["NUM_JOINTS"],
-            kernel_size=kwargs["FINAL_CONV_KERNEL"],
+            out_channels=params["NUM_JOINTS"]+1,
+            kernel_size=params["FINAL_CONV_KERNEL"],
             stride=1,
-            padding=1 if kwargs["FINAL_CONV_KERNEL"] == 3 else 0
+            padding=1 if params["FINAL_CONV_KERNEL"] == 3 else 0
         )
 
-        self.pretrained_layers = kwargs['PRETRAINED_LAYERS']
+        self.pretrained_layers = params['PRETRAINED_LAYERS']
 
     def _make_transition_layer(self, num_channels_pre_layer, num_channels_cur_layer):
         # transition layer makes new branches for the next stage
@@ -344,13 +344,15 @@ class HRNet(nn.Module):
             x_list = []
             for i in range(num_branches):
                 if transition[i] is not None:
+                    # use y_list[-1] not y_list[i] because you only ever need
+                    # the last branch to make new branches or to change num_channels
                     x_list.append(transition[i](y_list[-1]))
                 else:
                     x_list.append(y_list[i])
             y_list = stage(x_list)
 
         x = self.final_layer(y_list[0])
-
+        
         return x
 
     def init_weights(self, pretrained=''):
@@ -375,8 +377,9 @@ class HRNet(nn.Module):
             need_init_state_dict = {}
             for name, m in pretrained_state_dict.items():
                 if name.split('.')[0] in self.pretrained_layers \
-                   or self.pretrained_layers[0] is '*':
+                   or self.pretrained_layers[0] == '*':
                     need_init_state_dict[name] = m
             self.load_state_dict(need_init_state_dict, strict=False)
         elif pretrained:
             raise ValueError('{} is not exist!'.format(pretrained))
+

@@ -72,6 +72,62 @@ class OMC_CPM(Dataset):
         return imgs, heatmaps, centermap
 
 
+class OMC_HRNET(Dataset):
+    """
+    Dataset for OMC using hrnet
+    """
+    def __init__(self, is_training=True):
+        super(OMC_HRNET, self).__init__()
+        self.is_training = is_training
+
+        if self.is_training:
+            dir = os.path.join(dataset_dir, 'train_annotation.json')
+        else:
+            dir = os.path.join(dataset_dir, 'val_annotation.json')
+
+        with open(dir) as f:
+            dic = json.load(f)
+            self.feature_list = [item for item in dic['data']]
+
+
+    def __getitem__(self, index):
+        features = self.feature_list[index]
+        input_shape = (256,256)
+        hmap_shape = (64,64)
+
+        if(self.is_training==True):
+            img_folder_dir = os.path.join(dataset_dir, 'train')
+        else:
+            img_folder_dir = os.path.join(dataset_dir, 'val')
+        img_dir = os.path.join(img_folder_dir, features['file'])
+        img = mpimg.imread(img_dir)
+
+        # generate crop image
+        #print(img)
+        img_crop, pts_crop, _ = utils.crop(img, features)
+        pts_crop = np.array(pts_crop)
+        
+        train_img = np.transpose(img_crop, (2,0,1))/255.0
+        train_heatmaps = utils.gen_hmaps(np.zeros(hmap_shape), pts_crop/4)
+        
+        train_heatmaps = np.transpose(train_heatmaps, (2,0,1))
+
+        return train_img, train_heatmaps
+
+
+    def __len__(self):
+        return len(self.feature_list)
+
+
+    def collate_fn(self, batch):
+        imgs, heatmaps = list(zip(*batch))
+
+        imgs = np.stack(imgs, axis=0)
+        heatmaps = np.stack(heatmaps, axis=0)
+
+        return imgs, heatmaps
+
+
 class OMC_CPM_UNet(Dataset):
     """
     Dataset for OMC
@@ -183,6 +239,50 @@ class test_OMC(Dataset):
         return imgs, centermap, bb
 
 
+class test_OMC_HRNET(Dataset):
+    """
+    Dataset for OMC
+    """
+    def __init__(self, is_training=False):
+        super(test_OMC_HRNET, self).__init__()
+
+        dir = os.path.join(dataset_dir, 'test_prediction.json')
+
+        with open(dir) as f:
+            dic = json.load(f)
+            self.feature_list = [item for item in dic['data']]
+
+
+    def __getitem__(self, index):
+        features = self.feature_list[index]
+
+        img_folder_dir = os.path.join(dataset_dir, 'test')
+        img_dir = os.path.join(img_folder_dir, features['file'])
+        img = mpimg.imread(img_dir)
+
+        # generate crop image
+        #print(img)
+        img_crop, _, bb = utils.crop_test(img, features)
+        
+        test_img = np.transpose(img_crop, (2,0,1))/255.0
+
+        return test_img, bb
+
+
+    def __len__(self):
+        return len(self.feature_list)
+
+
+    def collate_fn(self, batch):
+        imgs, bb = list(zip(*batch))
+
+        imgs = np.stack(imgs, axis=0)
+        bb = np.stack(bb, axis=0)
+
+        return imgs, bb
+
+
+
 class sanity_check_OMC(Dataset):
     """
     Dataset for OMC
@@ -235,7 +335,7 @@ class sanity_check_OMC(Dataset):
 
 def main():
     #plt.ion()
-    omc = OMC(is_training=True)
+    omc = OMC_CPM(is_training=True)
     dataloader = torchdata.DataLoader(omc, batch_size=1, shuffle=True, collate_fn=omc.collate_fn)
     for i, (img, heatmap, centermap) in enumerate(dataloader):
         
